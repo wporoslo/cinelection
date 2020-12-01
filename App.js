@@ -1,21 +1,26 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import 'react-native-gesture-handler'
+import React from 'react'
+import { NavigationContainer } from '@react-navigation/native'
+import { createStackNavigator } from '@react-navigation/stack'
+import 'firebase/firestore'
+import { Fuego, FuegoProvider } from '@nandorojo/swr-firestore'
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
+import firebaseConfig from './api/index'
+import Home from './screens/Home'
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+const Stack = createStackNavigator()
+const fuego = new Fuego(firebaseConfig)
+
+const App = () => (
+  <NavigationContainer>
+    <Stack.Navigator initialRouteName='Home' animationEnabled>
+      <Stack.Screen name='Home' component={Home} />
+    </Stack.Navigator>
+  </NavigationContainer>
+)
+
+export default () => (
+  <FuegoProvider fuego={fuego}>
+    <App />
+  </FuegoProvider>
+)
