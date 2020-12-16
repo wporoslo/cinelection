@@ -1,28 +1,37 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native'
-import { useDocument } from '@nandorojo/swr-firestore'
+import { fuego, useCollection } from '@nandorojo/swr-firestore'
 
-const CreateRoom = () => {
-  const [userCount, setUserCount] = useState(0)
+const CreateRoom = ({ navigation }) => {
+  const [roomId, setRoomId] = useState('')
 
-  const { data, set } = useDocument(`room/5pbn7zjaqdu`, { listen: true })
+  useEffect(() => {
+    const id = Math.random().toString(36).substring(2)
+    setRoomId(id)
+  }, [])
+
+  // const { data, add } = useCollection(`room`)
 
   const handlePress = () => {
-    const id = Math.random().toString(36).substring(2)
-
-    set({ userCount, movies: { godfather: 1, roman: "pizda" } }, { merge: true })
+    // console.log(data)
+    fuego.db
+      .collection('room')
+      .add({ activeConnections: 1 })
+      .then(docRef => navigation.navigate(`room`, { id: docRef.id }))
   }
+  // add({ roomId, activeConnections: 1 }, { merge: true })
+  // navigation.navigate('room', { id: 'roman' })
   return (
     <View>
       <Text>Create a room</Text>
       <TextInput
         style={styles.input}
         placeholder='Wpisz liczbę głosujących'
-        value={userCount}
-        onChangeText={setUserCount}
+        value={roomId}
+        onChangeText={setRoomId}
       />
-      <Text sx={{ color: `#000` }}>{data ? data.userCount : 'loading'}</Text>
-      <Button title='Update a room' onPress={handlePress} />
+      <Button title='Create a room' onPress={handlePress} />
+      <Text>{roomId}</Text>
     </View>
   )
 }

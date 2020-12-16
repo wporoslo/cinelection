@@ -8,7 +8,10 @@ export default function Home({ navigation }) {
         onPress={() => navigation.navigate('Create')}
         title='Create new room'
       />
-      <Button title='Enter an existing room' />
+      <Button
+        onPress={() => navigation.navigate('Enter')}
+        title='Enter an existing room'
+      />
     </View>
   )
 }
