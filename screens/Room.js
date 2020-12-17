@@ -17,7 +17,6 @@ const {
 } = firebase
 
 const Room = ({ route }) => {
-
   console.log(route)
   const roomId = `room/${route.params.id}`
 
@@ -30,9 +29,6 @@ const Room = ({ route }) => {
 
   const increment = () => {
     update({ activeConnections: FieldValue.increment(1) })
-    .then(function () {
-      console.log('Document successfully updated!')
-    })
   }
   const decrement = () => {
     update({ activeConnections: FieldValue.increment(-1) })
