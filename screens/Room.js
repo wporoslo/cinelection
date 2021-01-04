@@ -7,20 +7,20 @@ import {
   // Platform,
   TouchableOpacity,
 } from 'react-native'
-import { fuego, useDocument } from '@nandorojo/swr-firestore'
+import {fuego, useDocument} from '@nandorojo/swr-firestore'
 // import { TouchableOpacity } from 'react-native-gesture-handler'
 
-import { AntDesign } from '@expo/vector-icons'
+import {AntDesign} from '@expo/vector-icons'
 
 const {
-  firestore: { FieldValue },
+  firestore: {FieldValue},
 } = firebase
 
-const Room = ({ route }) => {
+const Room = ({route}) => {
   console.log(route)
   const roomId = `room/${route.params.id}`
 
-  const { data, update, error } = useDocument(roomId, {
+  const {data, update, error} = useDocument(roomId, {
     shouldRetryOnError: true,
     onSuccess: console.log,
     loadingTimeout: 2000,
@@ -28,10 +28,10 @@ const Room = ({ route }) => {
   })
 
   const increment = () => {
-    update({ activeConnections: FieldValue.increment(1) })
+    update({activeConnections: FieldValue.increment(1)})
   }
   const decrement = () => {
-    update({ activeConnections: FieldValue.increment(-1) })
+    update({activeConnections: FieldValue.increment(-1)})
   }
   if (error) return <Text>Error!</Text>
   if (!data) return <Text>Loading...</Text>
@@ -40,13 +40,13 @@ const Room = ({ route }) => {
     <View>
       <View style={styles.container}>
         <TouchableOpacity onPress={decrement}>
-          <AntDesign name='minuscircle' size={24} color='black' />
+          <AntDesign name="minuscircle" size={24} color="black" />
         </TouchableOpacity>
         <TouchableOpacity onPress={increment}>
-          <AntDesign name='pluscircle' size={24} color='black' />
+          <AntDesign name="pluscircle" size={24} color="black" />
         </TouchableOpacity>
       </View>
-      <Text>{data.activeConnections}</Text>
+      <Text>{JSON.stringify(data.activeConnections)}</Text>
     </View>
   )
 }
