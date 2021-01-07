@@ -9,16 +9,45 @@ import {
 } from 'react-native'
 import {fuego, useDocument} from '@nandorojo/swr-firestore'
 // import { TouchableOpacity } from 'react-native-gesture-handler'
+import {useAuthState} from 'react-firebase-hooks/auth'
+import useSWR from 'swr'
 
 import {AntDesign} from '@expo/vector-icons'
+
+import {TMDBApiKey} from '../api'
+
+const {TMDBApiKey: apiKey} = TMDBApiKey
 
 const {
   firestore: {FieldValue},
 } = firebase
 
+const fetcher = (...args) => fetch(...args).then(res => res.json())
+
+const Movie = () => {
+  const {data, error} = useSWR(
+    `https://api.themoviedb.org/3/movie/top_rated?api_key=${apiKey}`,
+    fetcher,
+  )
+  if (error) return <Text>failed to load</Text>
+  if (!data) return <Text>loading...</Text>
+  // render data
+  console.log(data)
+  return (
+    <View>
+      {data.results.map(movie => (
+        <Text key={movie.id}>{movie.title}</Text>
+      ))}
+    </View>
+  )
+  // return <Text>hello {JSON.stringify(data.original_title)}!</Text>
+}
+
 const Room = ({route}) => {
-  console.log(route)
   const roomId = `room/${route.params.id}`
+
+  const auth = fuego.auth()
+  const [user] = useAuthState(auth)
 
   const {data, update, error} = useDocument(roomId, {
     shouldRetryOnError: true,
@@ -28,11 +57,12 @@ const Room = ({route}) => {
   })
 
   const increment = () => {
-    update({activeConnections: FieldValue.increment(1)})
+    update({a: FieldValue.increment(1)})
   }
   const decrement = () => {
-    update({activeConnections: FieldValue.increment(-1)})
+    update({a: FieldValue.increment(-1)})
   }
+
   if (error) return <Text>Error!</Text>
   if (!data) return <Text>Loading...</Text>
 
@@ -46,7 +76,8 @@ const Room = ({route}) => {
           <AntDesign name="pluscircle" size={24} color="black" />
         </TouchableOpacity>
       </View>
-      <Text>{JSON.stringify(data.activeConnections)}</Text>
+      <Text>{JSON.stringify(user.displayName)}</Text>
+      <Movie />
     </View>
   )
 }

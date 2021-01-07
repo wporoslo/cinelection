@@ -5,9 +5,8 @@ import { useDocument } from '@nandorojo/swr-firestore'
 
 import { useLinkTo } from "@react-navigation/native";
 
-const EnterRoom = ({ navigation }) => {
+const EnterRoom = () => {
   const linkTo = useLinkTo();
-  console.log(navigation)
   const [roomId, setRoomId] = useState('')
 
   const { data, update, error } = useDocument(`room/${roomId}`)
@@ -18,7 +17,6 @@ const EnterRoom = ({ navigation }) => {
     update({
       activeConnections: firebase.firestore.FieldValue.increment(1),
     }).then(() => linkTo(`/room/${roomId}`))
-    // navigation.navigate(`room`, { id: roomId})
     
   }
 
