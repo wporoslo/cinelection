@@ -25,7 +25,7 @@ const {
 
 const fetcher = (...args) => fetch(...args).then(res => res.json())
 
-const Movie = () => {
+const Movies = ({roomId}) => {
   const {data, error} = useSWR(
     `https://api.themoviedb.org/3/movie/top_rated?api_key=${apiKey}`,
     fetcher,
@@ -36,8 +36,38 @@ const Movie = () => {
     fetcher,
   )
 
+  const {data: movieData, update: updateMovie, error: movieError} = useDocument(
+    roomId,
+    {
+      shouldRetryOnError: true,
+      onSuccess: console.log,
+      loadingTimeout: 2000,
+      listen: true,
+    },
+  )
+
+  const increment = movieId => {
+    updateMovie({
+      [movieId]: {
+        votes: FieldValue.increment(1),
+      },
+    })
+  }
+
+  const decrement = movieId => {
+    updateMovie({
+      [movieId]: {
+        votes: FieldValue.increment(-1),
+      },
+    })
+  }
+
   if (error) return <Text>failed to load</Text>
+  if (imageError) return <Text>failed to load</Text>
   if (!data) return <Text>loading...</Text>
+  if (!imageData) return <Text>loading...</Text>
+
+  console.log(imageData)
 
   const renderItem = ({item}) => (
     <View
@@ -55,6 +85,14 @@ const Movie = () => {
           uri: `${imageData.images.base_url}${imageData.images.poster_sizes[4]}${item.poster_path}`,
         }}
       />
+      <View style={styles.container}>
+        <TouchableOpacity onPress={() => decrement(item.id)}>
+          <AntDesign name="minuscircle" size={24} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => increment(item.id)}>
+          <AntDesign name="pluscircle" size={24} color="black" />
+        </TouchableOpacity>
+      </View>
     </View>
   )
 
@@ -80,11 +118,11 @@ const Room = ({route}) => {
     listen: true,
   })
 
-  const increment = () => {
-    update({a: FieldValue.increment(1)})
+  const increment = movieId => {
+    update({movieId, votes: FieldValue.increment(1)})
   }
-  const decrement = () => {
-    update({a: FieldValue.increment(-1)})
+  const decrement = movieId => {
+    update({movieId, votes: FieldValue.increment(-1)})
   }
 
   if (error) return <Text>Error!</Text>
@@ -92,16 +130,8 @@ const Room = ({route}) => {
 
   return (
     <View>
-      <View style={styles.container}>
-        <TouchableOpacity onPress={decrement}>
-          <AntDesign name="minuscircle" size={24} color="black" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={increment}>
-          <AntDesign name="pluscircle" size={24} color="black" />
-        </TouchableOpacity>
-      </View>
       <Text>{JSON.stringify(user.displayName)}</Text>
-      <Movie />
+      <Movies roomId={roomId} />
     </View>
   )
 }
