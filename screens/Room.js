@@ -4,8 +4,9 @@ import {
   View,
   Text,
   StyleSheet,
-  // Platform,
+  Image,
   TouchableOpacity,
+  FlatList,
 } from 'react-native'
 import {fuego, useDocument} from '@nandorojo/swr-firestore'
 // import { TouchableOpacity } from 'react-native-gesture-handler'
@@ -29,18 +30,41 @@ const Movie = () => {
     `https://api.themoviedb.org/3/movie/top_rated?api_key=${apiKey}`,
     fetcher,
   )
+
+  const {data: imageData, error: imageError} = useSWR(
+    `https://api.themoviedb.org/3/configuration?api_key=${apiKey}`,
+    fetcher,
+  )
+
   if (error) return <Text>failed to load</Text>
   if (!data) return <Text>loading...</Text>
-  // render data
-  console.log(data)
-  return (
-    <View>
-      {data.results.map(movie => (
-        <Text key={movie.id}>{movie.title}</Text>
-      ))}
+
+  const renderItem = ({item}) => (
+    <View
+      style={{
+        flexDirection: `column`,
+      }}
+    >
+      <Text>{item.title}</Text>
+      <Image
+        style={{
+          height: 50,
+          width: 50,
+        }}
+        source={{
+          uri: `${imageData.images.base_url}${imageData.images.poster_sizes[4]}${item.poster_path}`,
+        }}
+      />
     </View>
   )
-  // return <Text>hello {JSON.stringify(data.original_title)}!</Text>
+
+  return (
+    <FlatList
+      data={data.results}
+      renderItem={renderItem}
+      keyExtractor={item => item.id}
+    />
+  )
 }
 
 const Room = ({route}) => {
