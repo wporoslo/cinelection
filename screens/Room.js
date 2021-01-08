@@ -25,56 +25,32 @@ const {
 
 const fetcher = (...args) => fetch(...args).then(res => res.json())
 
-const Movies = ({roomId}) => {
-  const {data, error} = useSWR(
-    `https://api.themoviedb.org/3/movie/top_rated?api_key=${apiKey}`,
-    fetcher,
-  )
-
-  const {data: imageData, error: imageError} = useSWR(
-    `https://api.themoviedb.org/3/configuration?api_key=${apiKey}`,
-    fetcher,
-  )
-
+const MovieCard = ({roomId, baseData, baseError, item, user}) => {
   const {data: movieData, update: updateMovie, error: movieError} = useDocument(
     roomId,
     {
       shouldRetryOnError: true,
-      onSuccess: console.log,
       loadingTimeout: 2000,
       listen: true,
     },
   )
 
-  const increment = movieId => {
+  const increment = () => {
     updateMovie({
-      [movieId]: {
-        votes: FieldValue.increment(1),
-      },
+      [`${item.id}.users`]: FieldValue.arrayUnion(user.uid),
+      [`${item.id}.votes`]: FieldValue.increment(1),
     })
   }
 
-  const decrement = movieId => {
+  const decrement = () => {
     updateMovie({
-      [movieId]: {
-        votes: FieldValue.increment(-1),
-      },
+      // [`${item.id}`]: user.id,
+      [`${item.id}.votes`]: FieldValue.increment(-1),
     })
   }
 
-  if (error) return <Text>failed to load</Text>
-  if (imageError) return <Text>failed to load</Text>
-  if (!data) return <Text>loading...</Text>
-  if (!imageData) return <Text>loading...</Text>
-
-  console.log(imageData)
-
-  const renderItem = ({item}) => (
-    <View
-      style={{
-        flexDirection: `column`,
-      }}
-    >
+  return (
+    <View style={styles.card}>
       <Text>{item.title}</Text>
       <Image
         style={{
@@ -82,25 +58,52 @@ const Movies = ({roomId}) => {
           width: 50,
         }}
         source={{
-          uri: `${imageData.images.base_url}${imageData.images.poster_sizes[4]}${item.poster_path}`,
+          uri: `${baseData.images.base_url}${baseData.images.poster_sizes[4]}${item.poster_path}`,
         }}
       />
       <View style={styles.container}>
-        <TouchableOpacity onPress={() => decrement(item.id)}>
+        <TouchableOpacity onPress={decrement}>
           <AntDesign name="minuscircle" size={24} color="black" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => increment(item.id)}>
+        <TouchableOpacity onPress={increment}>
           <AntDesign name="pluscircle" size={24} color="black" />
         </TouchableOpacity>
       </View>
     </View>
   )
+}
+
+const Movies = ({roomId, user}) => {
+  const {data: baseData, error: baseError} = useSWR(
+    `https://api.themoviedb.org/3/configuration?api_key=${apiKey}`,
+    fetcher,
+  )
+
+  const {data: dataFromApi, error: errorFromApi} = useSWR(
+    `https://api.themoviedb.org/3/movie/top_rated?api_key=${apiKey}`,
+    fetcher,
+  )
+
+  const renderItem = ({item}) => (
+    <MovieCard
+      baseData={baseData}
+      baseError={baseError}
+      roomId={roomId}
+      item={item}
+      user={user}
+    />
+  )
+
+  if (errorFromApi) return <Text>failed to load</Text>
+  if (baseError) return <Text>failed to load</Text>
+  if (!dataFromApi) return <Text>loading...</Text>
+  if (!baseData) return <Text>loading...</Text>
 
   return (
     <FlatList
-      data={data.results}
+      data={dataFromApi.results}
       renderItem={renderItem}
-      keyExtractor={item => item.id}
+      keyExtractor={item => JSON.stringify(item.id)}
     />
   )
 }
@@ -113,7 +116,6 @@ const Room = ({route}) => {
 
   const {data, update, error} = useDocument(roomId, {
     shouldRetryOnError: true,
-    onSuccess: console.log,
     loadingTimeout: 2000,
     listen: true,
   })
@@ -128,10 +130,12 @@ const Room = ({route}) => {
   if (error) return <Text>Error!</Text>
   if (!data) return <Text>Loading...</Text>
 
+  console.log(user)
+
   return (
     <View>
       <Text>{JSON.stringify(user.displayName)}</Text>
-      <Movies roomId={roomId} />
+      <Movies roomId={roomId} user={user} />
     </View>
   )
 }
@@ -141,6 +145,21 @@ const styles = StyleSheet.create({
     flexDirection: `row`,
     justifyContent: `center`,
     alignItems: `center`,
+  },
+  card: {
+    flexDirection: `column`,
+    justifyContent: `center`,
+    alignItems: `center`,
+    padding: 20,
+    shadowColor: 'rgba(0, 0, 0, .18)',
+    shadowOffset: {
+      width: 1,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+
+    elevation: 5,
   },
   count: {
     marginHorizontal: 20,
