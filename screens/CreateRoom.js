@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react'
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native'
-import { fuego, useCollection } from '@nandorojo/swr-firestore'
+import React, {useState, useEffect} from 'react'
+import {View, Text, TextInput, Button, StyleSheet} from 'react-native'
+import {useLinkTo} from '@react-navigation/native'
+import {fuego, useCollection} from '@nandorojo/swr-firestore'
 
-const CreateRoom = ({ navigation }) => {
+const CreateRoom = ({navigation}) => {
   const [roomId, setRoomId] = useState('')
+  const linkTo = useLinkTo()
 
   useEffect(() => {
     const id = Math.random().toString(36).substring(2)
@@ -16,8 +18,8 @@ const CreateRoom = ({ navigation }) => {
     // console.log(data)
     fuego.db
       .collection('room')
-      .add({ activeConnections: 1 })
-      .then(docRef => navigation.navigate(`room`, { id: docRef.id }))
+      .add({activeConnections: 1})
+      .then(docRef => linkTo(`/room/${docRef.id}`))
   }
   // add({ roomId, activeConnections: 1 }, { merge: true })
   // navigation.navigate('room', { id: 'roman' })
@@ -26,11 +28,11 @@ const CreateRoom = ({ navigation }) => {
       <Text>Create a room</Text>
       <TextInput
         style={styles.input}
-        placeholder='Wpisz liczbę głosujących'
+        placeholder="Wpisz liczbę głosujących"
         value={roomId}
         onChangeText={setRoomId}
       />
-      <Button title='Create a room' onPress={handlePress} />
+      <Button title="Create a room" onPress={handlePress} />
       <Text>{roomId}</Text>
     </View>
   )

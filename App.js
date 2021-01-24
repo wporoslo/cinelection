@@ -10,7 +10,7 @@ import 'firebase/auth'
 import {Fuego, FuegoProvider} from '@nandorojo/swr-firestore'
 import {useAuthState} from 'react-firebase-hooks/auth'
 
-import firebaseConfig from './api/index'
+import {firebaseConfig} from './api'
 import Home from './screens/Home'
 import CreateRoom from './screens/CreateRoom'
 import EnterRoom from './screens/EnterRoom'
