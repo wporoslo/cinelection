@@ -62,10 +62,10 @@ const MovieCard = ({roomId, baseData, baseError, item, user}) => {
         }}
       />
       <View style={styles.container}>
-        <TouchableOpacity onPress={decrement}>
+        <TouchableOpacity onPress={() => decrement()}>
           <AntDesign name="minuscircle" size={24} color="black" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={increment}>
+        <TouchableOpacity onPress={() => increment()}>
           <AntDesign name="pluscircle" size={24} color="black" />
         </TouchableOpacity>
       </View>
@@ -120,17 +120,8 @@ const Room = ({route}) => {
     listen: true,
   })
 
-  const increment = movieId => {
-    update({movieId, votes: FieldValue.increment(1)})
-  }
-  const decrement = movieId => {
-    update({movieId, votes: FieldValue.increment(-1)})
-  }
-
   if (error) return <Text>Error!</Text>
   if (!data) return <Text>Loading...</Text>
-
-  console.log(user)
 
   return (
     <View>
