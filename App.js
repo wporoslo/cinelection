@@ -34,25 +34,35 @@ const linking = {
   },
 }
 
-function SignIn() {
+const SignIn = () => {
   const signInWithGoogle = () => {
     const provider = new fuego.auth.GoogleAuthProvider()
-    auth.signInWithPopup(provider)
+    auth.signInAnonymously()
   }
 
-  return <Button onPress={signInWithGoogle} title="Sign in with Google" />
+  return (
+    <Button
+      onPress={signInWithGoogle}
+      title="Sign in"
+      style={{flex: 1, position: 'absolute', bottom: 0}}
+    />
+  )
 }
 
 const App = () => {
   const [user] = useAuthState(auth)
   return (
     <NavigationContainer linking={linking} fallback={<Text>Loading...</Text>}>
-      <Stack.Navigator initialRouteName="Home" animationEnabled>
-        <Stack.Screen name="Home" component={user ? Home : SignIn} />
-        <Stack.Screen name="Create" component={CreateRoom} />
-        <Stack.Screen name="Enter" component={EnterRoom} />
-        <Stack.Screen name="Room" component={Room} />
-      </Stack.Navigator>
+      {user ? (
+        <Stack.Navigator initialRouteName="Home" animationEnabled>
+          <Stack.Screen name="Home" component={Home} />
+          <Stack.Screen name="Create" component={CreateRoom} />
+          <Stack.Screen name="Enter" component={EnterRoom} />
+          <Stack.Screen name="Room" component={Room} />
+        </Stack.Navigator>
+      ) : (
+        <SignIn />
+      )}
     </NavigationContainer>
   )
 }

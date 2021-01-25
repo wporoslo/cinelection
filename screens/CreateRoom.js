@@ -1,28 +1,27 @@
 import React, {useState, useEffect} from 'react'
 import {View, Text, TextInput, Button, StyleSheet} from 'react-native'
 import {useLinkTo} from '@react-navigation/native'
+import firebase from 'firebase/app'
 import {fuego, useCollection} from '@nandorojo/swr-firestore'
+import {useAuthState} from 'react-firebase-hooks/auth'
 
-const CreateRoom = ({navigation}) => {
+const {
+  firestore: {FieldValue},
+} = firebase
+
+const CreateRoom = () => {
   const [roomId, setRoomId] = useState('')
+  const auth = fuego.auth()
+  const [user] = useAuthState(auth)
   const linkTo = useLinkTo()
 
-  useEffect(() => {
-    const id = Math.random().toString(36).substring(2)
-    setRoomId(id)
-  }, [])
-
-  // const { data, add } = useCollection(`room`)
-
   const handlePress = () => {
-    // console.log(data)
     fuego.db
       .collection('room')
-      .add({activeConnections: 1})
+      .add({users: FieldValue.arrayUnion(user.uid)})
       .then(docRef => linkTo(`/room/${docRef.id}`))
   }
-  // add({ roomId, activeConnections: 1 }, { merge: true })
-  // navigation.navigate('room', { id: 'roman' })
+
   return (
     <View>
       <Text>Create a room</Text>
