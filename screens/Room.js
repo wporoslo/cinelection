@@ -130,13 +130,6 @@ const Room = ({route}) => {
 
   if (error) return <Text>Error!</Text>
   if (!data) return <Text>Loading...</Text>
-  if (data.movie) {
-    for (const movie of data.movies) {
-      if (movie.votes === data.users.length) {
-        update({winner: movie})
-      }
-    }
-  }
 
   return (
     <View>
